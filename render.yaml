@@ -1,0 +1,65 @@
+services:
+  # ── Backend API (Node/Express) ──────────────────────────────────────────────
+  - type: web
+    name: brandforge-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: brandforge-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false          # Set manually in Render dashboard
+      - key: UNSPLASH_ACCESS_KEY
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: FRONTEND_URL
+        sync: false          # Set to your Render static site URL
+      - key: APP_URL
+        sync: false
+
+  # ── Frontend (React/Vite static site) ──────────────────────────────────────
+  - type: web
+    name: brandforge-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false          # Set to your backend URL e.g. https://brandforge-backend.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+# ── PostgreSQL database ──────────────────────────────────────────────────────
+databases:
+  - name: brandforge-db
+    plan: free
+    databaseName: brandforge
+    user: brandforge
